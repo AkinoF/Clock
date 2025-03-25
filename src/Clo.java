@@ -25,6 +25,8 @@ public class Clo extends JPanel implements ActionListener {
         int seconds = now.get(Calendar.SECOND);
         int minutes = now.get(Calendar.MINUTE);
         int hours = now.get(Calendar.HOUR_OF_DAY);
+        int day = now.get(Calendar.DAY_OF_MONTH);
+        int month = now.get(Calendar.MONTH) + 1; // Январь = 0
 
         // Устанавливаем размеры и центр
         int width = getWidth();
@@ -33,13 +35,14 @@ public class Clo extends JPanel implements ActionListener {
         int centerY = height / 2;
         int radius = Math.min(width, height) / 3; // Уменьшаем радиус
 
-        // Рисуем круг часов
+        // Рисуем овал часов
         g.setColor(Color.WHITE);
         g.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
         g.setColor(Color.BLACK);
         g.drawOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
-        // Рисуем деления
+        // Рисуем деления и циферблат с римскими цифрами
+        String[] romanNumerals = {"XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"};
         for (int i = 0; i < 12; i++) {
             double angle = Math.toRadians(i * 30);
             int x1 = centerX + (int) (Math.cos(angle) * (radius - 10));
@@ -47,6 +50,15 @@ public class Clo extends JPanel implements ActionListener {
             int x2 = centerX + (int) (Math.cos(angle) * radius);
             int y2 = centerY - (int) (Math.sin(angle) * radius);
             g.drawLine(x1, y1, x2, y2);
+
+            // Рисуем римские цифры
+            String hourString = romanNumerals[i];
+            FontMetrics metrics = g.getFontMetrics();
+            int textWidth = metrics.stringWidth(hourString);
+            int textHeight = metrics.getAscent();
+            int textX = centerX + (int) (Math.cos(angle) * (radius - 30)) - textWidth / 2;
+            int textY = centerY - (int) (Math.sin(angle) * (radius - 30)) + textHeight / 2;
+            g.drawString(hourString, textX, textY);
         }
 
         // Рисуем стрелку часов
@@ -74,7 +86,18 @@ public class Clo extends JPanel implements ActionListener {
         String timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString(timeString, centerX - g.getFontMetrics().stringWidth(timeString) / 2, centerY + radius + 20); // Изменили позицию текста
+        g.drawString(timeString, centerX - g.getFontMetrics().stringWidth(timeString) / 2, centerY + radius + 20);
+
+        // Отображаем дату (день и месяц)
+        String dateString = String.format("%02d/%02d", day, month);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.PLAIN, 16));
+        g.drawString(dateString, centerX + radius + 10, centerY); // Дата справа от часов
+
+        // Рисуем два зеленых кружка
+        g.setColor(Color.GREEN);
+        g.fillOval(centerX - 30, centerY + radius + 30, 20, 20);
+        g.fillOval(centerX + 10, centerY + radius + 30, 20, 20);
     }
 
     @Override
