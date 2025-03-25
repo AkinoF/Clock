@@ -10,6 +10,7 @@ public class Clo extends JPanel implements ActionListener {
     public Clo() {
         timer = new Timer(1000, this); // Обновление каждую секунду
         timer.start();
+        setBackground(Color.WHITE); // Устанавливаем цвет фона
     }
 
     @Override
@@ -30,13 +31,13 @@ public class Clo extends JPanel implements ActionListener {
         int height = getHeight();
         int centerX = width / 2;
         int centerY = height / 2;
-        int radius = Math.min(width, height) / 2 - 20;
+        int radius = Math.min(width, height) / 3; // Уменьшаем радиус
 
         // Рисуем круг часов
         g.setColor(Color.WHITE);
-        g.fillOval(20, 20, width - 40, height - 40);
+        g.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
         g.setColor(Color.BLACK);
-        g.drawOval(20, 20, width - 40, height - 40);
+        g.drawOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
         // Рисуем деления
         for (int i = 0; i < 12; i++) {
@@ -73,7 +74,7 @@ public class Clo extends JPanel implements ActionListener {
         String timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString(timeString, centerX - g.getFontMetrics().stringWidth(timeString) / 2, centerY + radius + 30);
+        g.drawString(timeString, centerX - g.getFontMetrics().stringWidth(timeString) / 2, centerY + radius + 20); // Изменили позицию текста
     }
 
     @Override
