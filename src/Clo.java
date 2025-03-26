@@ -27,6 +27,7 @@ public class Clo extends JPanel implements ActionListener {
         int hours = now.get(Calendar.HOUR_OF_DAY);
         int day = now.get(Calendar.DAY_OF_MONTH);
         int month = now.get(Calendar.MONTH) + 1; // Январь = 0
+        int year = now.get(Calendar.YEAR); // Получаем год
 
         // Устанавливаем размеры и центр
         int width = getWidth();
@@ -42,7 +43,7 @@ public class Clo extends JPanel implements ActionListener {
         g.drawOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
         // Рисуем деления и циферблат с римскими цифрами
-        String[] romanNumerals = {"XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"};
+        String[] romanNumerals = {"III", "II", "I", "XII", "XI", "X", "IX", "VIII", "VII", "VI", "V", "IV"};
         for (int i = 0; i < 12; i++) {
             double angle = Math.toRadians(i * 30);
             int x1 = centerX + (int) (Math.cos(angle) * (radius - 10));
@@ -51,53 +52,93 @@ public class Clo extends JPanel implements ActionListener {
             int y2 = centerY - (int) (Math.sin(angle) * radius);
             g.drawLine(x1, y1, x2, y2);
 
-            // Рисуем римские цифры
+            // Рисуем римские цифры за часами
             String hourString = romanNumerals[i];
             FontMetrics metrics = g.getFontMetrics();
             int textWidth = metrics.stringWidth(hourString);
             int textHeight = metrics.getAscent();
-            int textX = centerX + (int) (Math.cos(angle) * (radius - 30)) - textWidth / 2;
-            int textY = centerY - (int) (Math.sin(angle) * (radius - 30)) + textHeight / 2;
+            int textX = centerX + (int) (Math.cos(angle) * (radius + 10)) - textWidth / 2; // Изменено на radius + 10
+            int textY = centerY - (int) (Math.sin(angle) * (radius + 10)) + textHeight / 2; // Изменено на radius + 10
             g.drawString(hourString, textX, textY);
         }
 
-        // Рисуем стрелку часов
-        double hourAngle = Math.toRadians((hours % 12 + minutes / 60.0) * 30);
+        // Рисуем часовую стрелку с треугольником
+        double hourAngle = Math.toRadians((hours % 12 + minutes / 60.0) * 180); // Угол для часовой стрелки
         int hourX = centerX + (int) (Math.cos(hourAngle - Math.PI / 2) * (radius * 0.5));
         int hourY = centerY + (int) (Math.sin(hourAngle - Math.PI / 2) * (radius * 0.5));
         g.setColor(Color.BLACK);
         g.drawLine(centerX, centerY, hourX, hourY);
 
-        // Рисуем стрелку минут
+        // Рисуем треугольник на конце часовой стрелки
+        int hourTriangleOffset = 10; // Смещение треугольника
+        int[] xPointsHour = {
+                hourX,
+                hourX - (int)(15 * Math.cos(hourAngle + Math.PI / 2)), // Увеличиваем длину
+                hourX + (int)(15 * Math.cos(hourAngle - Math.PI / 2))  // Увеличиваем длину
+        };
+        int[] yPointsHour = {
+                hourY,
+                hourY - (int)(15 * Math.sin(hourAngle + Math.PI / 2)), // Увеличиваем длину
+                hourY - (int)(15 * Math.sin(hourAngle - Math.PI / 2))  // Увеличиваем длину
+        };
+        g.fillPolygon(xPointsHour, yPointsHour, 3);
+
+        // Рисуем минутную стрелку с кругом на конце
         double minuteAngle = Math.toRadians((minutes + seconds / 60.0) * 6);
         int minuteX = centerX + (int) (Math.cos(minuteAngle - Math.PI / 2) * (radius * 0.7));
         int minuteY = centerY + (int) (Math.sin(minuteAngle - Math.PI / 2) * (radius * 0.7));
-        g.setColor(Color.BLUE);
+        g.setColor(Color.BLACK);
         g.drawLine(centerX, centerY, minuteX, minuteY);
 
-        // Рисуем стрелку секунд
+        // Рисуем круг на конце минутной стрелки
+        g.setColor(Color.BLUE);
+        g.fillOval(minuteX - 8, minuteY - 8, 16, 16); // Круг на конце минутной стрелки
+
+        // Рисуем секундную стрелку с треугольником
         double secondAngle = Math.toRadians(seconds * 6);
         int secondX = centerX + (int) (Math.cos(secondAngle - Math.PI / 2) * (radius * 0.9));
         int secondY = centerY + (int) (Math.sin(secondAngle - Math.PI / 2) * (radius * 0.9));
         g.setColor(Color.RED);
         g.drawLine(centerX, centerY, secondX, secondY);
 
-        // Отображаем текущее время
-        String timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString(timeString, centerX - g.getFontMetrics().stringWidth(timeString) / 2, centerY + radius + 20);
+        // Рисуем треугольник на конце секундной стрелки
+        int[] xPointsSecond = {
+                secondX,
+                secondX - (int)(15 * Math.cos(secondAngle + Math.PI / 3)), // Увеличиваем размер
+                secondX + (int)(15 * Math.cos(secondAngle - Math.PI / 3))  // Увеличиваем размер
+        };
+        int[] yPointsSecond = {
+                secondY,
+                secondY - (int)(15 * Math.sin(secondAngle + Math.PI / 3)), // Увеличиваем размер
+                secondY - (int)(15 * Math.sin(secondAngle - Math.PI / 3))  // Увеличиваем размер
+        };
+        g.fillPolygon(xPointsSecond, yPointsSecond, 3);
 
-        // Отображаем дату (день и месяц)
+        // Отображаем год слева от часов
+        String yearString = String.valueOf(year);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.PLAIN, 16));
+        g.drawString(yearString, centerX - radius - g.getFontMetrics().stringWidth(yearString) - 10, centerY - 20); // Год слева от часов
+
+        // Отображаем дату (день и месяц) справа от часов
         String dateString = String.format("%02d/%02d", day, month);
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.PLAIN, 16));
-        g.drawString(dateString, centerX + radius + 10, centerY); // Дата справа от часов
+        g.drawString(dateString, centerX + radius + 10, centerY - 20); // Дата справа от часов
 
-        // Рисуем два зеленых кружка
+        // Рисуем два зеленых кружка с жирной линией под овалом
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(3)); // Устанавливаем толщину линии
         g.setColor(Color.GREEN);
-        g.fillOval(centerX - 30, centerY + radius + 30, 20, 20);
-        g.fillOval(centerX + 10, centerY + radius + 30, 20, 20);
+        g.fillOval(centerX - 100, centerY + radius + 10, 20, 20); // Первый кружок
+        g.fillOval(centerX + 80, centerY + radius + 10, 20, 20); // Второй кружок
+        g.setColor(Color.BLACK);
+        g.drawOval(centerX - 100, centerY + radius + 10, 20, 20); // Обводим первый кружок
+        g.drawOval(centerX + 80, centerY + radius + 10, 20, 20); // Обводим второй кружок
+
+        // Рисуем овал вокруг часов с жирной линией
+        g.setColor(Color.BLACK);
+        g.drawOval(centerX - radius - 55, centerY - radius - 30, (radius + 55) * 2, (radius + 30) * 2); // Овал вокруг часов
     }
 
     @Override
